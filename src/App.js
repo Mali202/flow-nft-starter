@@ -2,6 +2,16 @@
 import React, { useState, useEffect } from "react";
 import './App.css';
 import twitterLogo from "./assets/twitter-logo.svg";
+import * as fcl from "@onflow/fcl";
+import * as types from "@onflow/types";
+
+fcl.config({
+    "flow.network": "testnet",
+    "app.detail.title": "Assassins on the blockchain", // Change the title!
+    "accessNode.api": "https://rest-testnet.onflow.org",
+    "app.detail.icon": "https://placekitten.com/g/200/200",
+    "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
+});
 
 const TWITTER_HANDLE = "_buildspace";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
