@@ -7,7 +7,7 @@ import * as types from "@onflow/types";
 
 fcl.config({
     "flow.network": "testnet",
-    "app.detail.title": "Assassins on the blockchain", // Change the title!
+    "app.detail.title": "BottomShot", // Change the title!
     "accessNode.api": "https://rest-testnet.onflow.org",
     "app.detail.icon": "https://placekitten.com/g/200/200",
     "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
@@ -18,8 +18,49 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
 function App() {
 
+    const [ user, setUser ] = useState();
+
+    const logIn = () => {
+        fcl.authenticate();
+    };
+
+    const logOut = () => {
+        fcl.unauthenticate();
+    };
+
+    useEffect(() => {
+        // This listens to changes in the user objects
+        // and updates the connected user
+        fcl.currentUser().subscribe(setUser);
+    }, [])
+
+    const RenderLogin = () => {
+        return (
+            <div>
+                <button className="cta-button button-glow" onClick={() => logIn()}>
+                    Log In
+                </button>
+            </div>
+        );
+    };
+
+    const RenderLogout = () => {
+        if (user && user.addr) {
+            return (
+                <div className="logout-container">
+                    <button className="cta-button logout-btn" onClick={() => logOut()}>
+                        ❎ {"  "}
+                        {user.addr.substring(0, 6)}...{user.addr.substring(user.addr.length - 4)}
+                    </button>
+                </div>
+            );
+        }
+        return undefined;
+    };
+
     return (
         <div className="App">
+            <RenderLogout />
             <div className="container">
                 <div className="header-container">
                     <div className="logo-container">
@@ -29,6 +70,8 @@ function App() {
 
                     <p className="sub-text">The easiest NFT mint experience ever!</p>
                 </div>
+
+                {user && user.addr ? "Wallet connected!" : <RenderLogin />}
 
                 <div className="footer-container">
                     <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo}/>
