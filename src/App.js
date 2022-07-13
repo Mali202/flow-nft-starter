@@ -4,6 +4,8 @@ import './App.css';
 import twitterLogo from "./assets/twitter-logo.svg";
 import * as fcl from "@onflow/fcl";
 import * as types from "@onflow/types";
+import { mintNFT } from "./cadence/transactions/mintNFT_tx";
+import { getTotalSupply } from "./cadence/scripts/getTotalSupply_script";
 
 fcl.config({
     "flow.network": "testnet",
@@ -93,6 +95,16 @@ function App() {
         return undefined;
     };
 
+    const RenderMintButton = () => {
+        return (
+            <div>
+                <button className="cta-button button-glow" onClick={() => mint()}>
+                    Mint
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="App">
             <RenderLogout />
@@ -106,7 +118,7 @@ function App() {
                     <p className="sub-text">The easiest NFT mint experience ever!</p>
                 </div>
 
-                {user && user.addr ? "Wallet connected!" : <RenderLogin />}
+                {user && user.addr ? <RenderMintButton /> : <RenderLogin />}
 
                 <div className="footer-container">
                     <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo}/>
