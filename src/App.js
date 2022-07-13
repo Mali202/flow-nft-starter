@@ -28,6 +28,41 @@ function App() {
         fcl.unauthenticate();
     };
 
+    const mint = async() => {
+
+        let _totalSupply;
+        try {
+            _totalSupply = await fcl.query({
+                cadence: `${getTotalSupply}`
+            })
+        } catch(err) {console.log(err)}
+
+        const _id = parseInt(_totalSupply) + 1;
+
+        try {
+            const transactionId = await fcl.mutate({
+                cadence: `${mintNFT}`,
+                args: (arg, t) => [
+                    arg(user.addr, types.Address), //address to which the NFT should be minted
+                    arg("Assassin # "+_id.toString(), types.String), // Name
+                    arg("Assassins on the blockchain", types.String), // Description
+                    arg("ipfs://bafybeifpjduxfmzt7bd67rw7ypgwto5pua7eeoeqgqkwuxdfy4wpkyggoe/"+_id+".png", types.String),
+                ],
+                proposer: fcl.currentUser,
+                payer: fcl.currentUser,
+                limit: 99
+            })
+            console.log("Minting NFT now with transaction ID", transactionId);
+            const transaction = await fcl.tx(transactionId).onceSealed();
+            console.log("Testnet explorer link:", `https://testnet.flowscan.org/transaction/${transactionId}`);
+            console.log(transaction);
+            alert("NFT minted successfully!")
+        } catch (error) {
+            console.log(error);
+            alert("Error minting NFT, please check the console for error details!")
+        }
+    }
+
     useEffect(() => {
         // This listens to changes in the user objects
         // and updates the connected user
