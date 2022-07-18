@@ -6,12 +6,14 @@ import * as fcl from "@onflow/fcl";
 import * as types from "@onflow/types";
 import { mintNFT } from "./cadence/transactions/mintNFT_tx";
 import { getTotalSupply } from "./cadence/scripts/getTotalSupply_script";
+import { getMetadata } from "./cadence/scripts/getMetadata_script";
+import { getIDs } from "./cadence/scripts/getID_script";
 
 fcl.config({
     "flow.network": "testnet",
-    "app.detail.title": "BottomShot", // Change the title!
+    "app.detail.title": "Creed", // Change the title!
     "accessNode.api": "https://rest-testnet.onflow.org",
-    "app.detail.icon": "https://placekitten.com/g/200/200",
+    "app.detail.icon": "https://i.pinimg.com/564x/a2/23/a3/a223a393e38aa8fb98591c6abb9b5d82.jpg",
     "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
 });
 
@@ -21,12 +23,14 @@ const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 function App() {
 
     const [ user, setUser ] = useState();
+    const [ images, setImages ] = useState([])
 
     const logIn = () => {
         fcl.authenticate();
     };
 
     const logOut = () => {
+        setImages([]);
         fcl.unauthenticate();
     };
 
@@ -65,11 +69,66 @@ function App() {
         }
     }
 
+    const fetchNFTs = async () => {
+        // Empty the images array
+        setImages([]);
+        let IDs = [];
+
+        // Fetch the IDs with our script (no fees or signers necessary)
+        try {
+            IDs = await fcl.query({
+                cadence: `${getIDs}`,
+                args: (arg, t) => [
+                    arg(user.addr, types.Address),
+                ],
+            })
+        } catch(err) {
+            console.log("No NFTs Owned")
+        }
+
+        let _imageSrc = []
+        try{
+            for(let i=0; i<IDs.length; i++) {
+                const result = await fcl.query({
+                    cadence: `${getMetadata}`,
+                    args: (arg, t) => [
+                        arg(user.addr, types.Address),
+                        arg(IDs[i].toString(), types.UInt64),
+                    ],
+                })
+                // If the source is an IPFS link, remove the "ipfs://" prefix
+                if (result["thumbnail"].startsWith("ipfs://")) {
+                    _imageSrc.push(result["thumbnail"].substring(7))
+                    // Add a gateway prefix
+                    _imageSrc[i] = "https://nftstorage.link/ipfs/" + _imageSrc[i]
+                }
+                else {
+                    _imageSrc.push(result["thumbnail"])
+                }
+            }
+        } catch(err) {
+            console.log(err)
+        }
+
+        if(images.length < _imageSrc.length) {
+            setImages((Array.from({length: _imageSrc.length}, (_, i) => i).map((number, index)=>
+                <img style={{margin:"10px", height: "150px"}} src={_imageSrc[index]} key={number} alt={"NFT #"+number}
+                />
+            )))
+        }
+    }
+
     useEffect(() => {
         // This listens to changes in the user objects
         // and updates the connected user
         fcl.currentUser().subscribe(setUser);
     }, [])
+
+    useEffect(() => {
+        if (user && user.addr) {
+            fetchNFTs();
+        }
+    }, [user]);
 
     const RenderLogin = () => {
         return (
@@ -98,9 +157,19 @@ function App() {
     const RenderMintButton = () => {
         return (
             <div>
-                <button className="cta-button button-glow" onClick={() => mint()}>
-                    Mint
-                </button>
+                <div className="button-container">
+                    <button className="cta-button button-glow" onClick={() => mint()}>
+                        Mint
+                    </button>
+                </div>
+                {images.length > 0 ?
+                    <>
+                        <h2>Your NFTs</h2>
+                        <div className="image-container">
+                            {images}
+                        </ div>
+                    </>
+                    : ""}
             </div>
         );
     }
