@@ -1,6 +1,6 @@
 export const mintNFT = 
 `
-import Creed from 0x6d298508daa1ea0a 
+import CreedV2 from 0x6d298508daa1ea0a 
 import NonFungibleToken from 0x631e88ae7f1d7c20
 import MetadataViews from 0x631e88ae7f1d7c20
 
@@ -11,20 +11,20 @@ transaction(
   thumbnail: String,
 ) {
   prepare(signer: AuthAccount) {
-    if signer.borrow<&Creed.Collection>(from: Creed.CollectionStoragePath) != nil {
+    if signer.borrow<&CreedV2.Collection>(from: CreedV2.CollectionStoragePath) != nil {
       return
     }
 
     // Create a new empty collection
-    let collection <- Creed.createEmptyCollection()
+    let collection <- CreedV2.createEmptyCollection()
 
     // save it to the account
-    signer.save(<-collection, to: Creed.CollectionStoragePath)
+    signer.save(<-collection, to: CreedV2.CollectionStoragePath)
 
     // create a public capability for the collection
     signer.link<&{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(
-      Creed.CollectionPublicPath,
-      target: Creed.CollectionStoragePath
+      CreedV2.CollectionPublicPath,
+      target: CreedV2.CollectionStoragePath
     )
   }
 
@@ -32,12 +32,12 @@ transaction(
   execute {
     // Borrow the recipient's public NFT collection reference
     let receiver = getAccount(recipient)
-      .getCapability(Creed.CollectionPublicPath)
+      .getCapability(CreedV2.CollectionPublicPath)
       .borrow<&{NonFungibleToken.CollectionPublic}>()
       ?? panic("Could not get receiver reference to the NFT Collection")
 
     // Mint the NFT and deposit it to the recipient's collection
-    Creed.mintNFT(
+    CreedV2.mintNFT(
       recipient: receiver,
       name: name,
       description: description,

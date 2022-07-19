@@ -11,7 +11,7 @@ import { getIDs } from "./cadence/scripts/getID_script";
 
 fcl.config({
     "flow.network": "testnet",
-    "app.detail.title": "Creed", // Change the title!
+    "app.detail.title": "Creed",
     "accessNode.api": "https://rest-testnet.onflow.org",
     "app.detail.icon": "https://i.pinimg.com/564x/a2/23/a3/a223a393e38aa8fb98591c6abb9b5d82.jpg",
     "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn",
