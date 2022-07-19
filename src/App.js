@@ -34,6 +34,13 @@ function App() {
         fcl.unauthenticate();
     };
 
+    const RenderGif = () => {
+        const gifUrl = user?.addr
+            ? "https://media.giphy.com/media/BY3xvY7bl6DQFMuIg2/giphy.gif"
+            : "https://i.giphy.com/media/Y2ZUWLrTy63j9T6qrK/giphy.webp";
+        return <img className="gif-image" src={gifUrl} height="300px" alt="Funny gif"/>;
+    };
+
     const mint = async() => {
 
         let _totalSupply;
@@ -183,7 +190,7 @@ function App() {
                         <img src="./logo.png" className="flow-logo" alt="flow logo"/>
                         <p className="header">✨Awesome NFTs on Flow ✨</p>
                     </div>
-
+                    <RenderGif/>
                     <p className="sub-text">The easiest NFT mint experience ever!</p>
                 </div>
 
